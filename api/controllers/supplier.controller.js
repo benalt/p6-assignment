@@ -6,16 +6,16 @@ const Op = db.Sequelize.Op;
 // Create and Save a new Supplier
 exports.create = (req, res) => {
   // Validate request
-  if (!req.body.title) {
+  if (!req.body.name) {
     res.status(400).send({
       message: "Content can not be empty!"
     });
     return;
   }
-
+  
   // Create a Supplier
   const supplier = {
-    name: req.body.title,
+    name: req.body.name,
     emailAddress: req.body.emailAddress,
     category: req.body.category,
     description: req.body.description
@@ -36,11 +36,13 @@ exports.create = (req, res) => {
 
 // Retrieve all Suppliers from the database.
 exports.findAll = (req, res) => {
-  const name = req.query.name;
-  var condition = name ? { name: { [Op.iLike]: `%${name}%` } } : null;
-  console.log('hello!')
-
-  Supplier.findAll()
+  Supplier.findAll(
+    {
+      order: [
+      ['id', 'ASC'],
+      ['name', 'ASC'],
+    ]}
+  )
     .then(data => {
       res.send(data);
     })
