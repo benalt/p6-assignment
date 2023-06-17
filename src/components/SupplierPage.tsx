@@ -2,14 +2,16 @@ import { CategoryOptions, Supplier } from '@/types'
 import SupplierTable from '@/components/SupplierTable'
 import { useEffect, useState } from 'react'
 import EditSupplier from './EditSupplier';
-import { isInvalidSupplier } from '@/lib/supplier.validator';
+import { isValidSupplier } from '@/lib/supplier.validator';
 
 const SupplierPage = () => {
 
   const [supplierList, setSuppliersList] : [Array<Supplier>|undefined, Function] = useState();
   const [dirtySupplier, setDirtySupplier]: [Partial<Supplier>|undefined, Function] = useState();
+  const [activeSupplier, setActiveSupplier]: [Partial<Supplier>|undefined, Function] = useState();
   const [categoriesList, setCategoriesList]: [Array<CategoryOptions>|undefined, Function] = useState();
-  
+  const [flashMessage, setFlashMessage]: [string|null, Function] = useState(null)
+
   useEffect(()=>{
     async function fetchData() {
       const res = await fetch('http://localhost:8080/api/suppliers')
@@ -45,7 +47,7 @@ const SupplierPage = () => {
       fetchUrl = `http://localhost:8080/api/suppliers/${dirtySupplier.id}`
     } 
 
-    async function createOrUpdateCatagory() {
+    async function createOrUpdateSupplier() {
       const res = await fetch(fetchUrl, 
         { 
           method:fetchMethod,
@@ -70,19 +72,39 @@ const SupplierPage = () => {
       setSuppliersList( [
         ... responsedData
       ])
+      setFlashMessage( `Supplier ${responsedData.name} has been ${ update? 'updated' : 'saved'}.`)
     }
-    createOrUpdateCatagory()
+    createOrUpdateSupplier()
 
   }, [dirtySupplier])
   
 
   function handleSupplierChange(payload:Partial<Supplier>) {
-    if (!isInvalidSupplier(payload)) {
+    if (isValidSupplier(payload)) {
       setDirtySupplier(payload); 
     }
   }
 
   function handleCancelEdit(){}
+
+  function handleInsepctRequest(supplier:Supplier){
+
+  }
+
+  function handleSupplierDeleteRequest(supplier:Supplier){
+    async function deleteSupplier() {
+      const res = await fetch(`http://localhost:8080/api/suppliers/delete/${supplier.id}`, 
+        { 
+          method: "DELETE"
+        })
+      if (!res.ok) {
+        throw new Error('Failed to delete data')
+      }
+      
+      setFlashMessage( `Supplier ${supplier.name} has been deleted.`)
+    }
+    deleteSupplier()
+  }
 
   return (
 <>
@@ -91,11 +113,11 @@ const SupplierPage = () => {
   <button>Add Supplier</button>
   { !supplierList 
   ?  <>Fetching Supplier List</>
-    : <SupplierTable suppliers={supplierList}/>
+    : <SupplierTable suppliers={supplierList} onDeleteRequest={handleSupplierDeleteRequest} onInspectRequest={handleInsepctRequest} />
   }
   { !supplierList || !categoriesList
     ? <>Fetching Suppliers and Categories</>
-    : <EditSupplier supplier={ supplierList[0] || null } categories={categoriesList} onChange={handleSupplierChange} onCancel={handleCancelEdit()} />
+    : <EditSupplier supplier={ activeSupplier || {} } categories={categoriesList} onChange={handleSupplierChange} onCancel={handleCancelEdit} />
   }
   
 </div>

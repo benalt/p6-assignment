@@ -1,7 +1,12 @@
+import { BaseSyntheticEvent } from 'react'
 import { Supplier } from '../types'
-const SupplierTable = (props:{ suppliers:Array<Supplier> }) => {
-  const { suppliers } = props
-
+const SupplierTable = ( props:{ 
+  suppliers:Array<Supplier>, 
+  onDeleteRequest(supplier:Supplier):void 
+  onInspectRequest(supplier:Supplier):void
+}) => {
+  const { suppliers, onDeleteRequest, onInspectRequest } = props
+  
   return (<>
   <table>
     <thead>
@@ -13,13 +18,13 @@ const SupplierTable = (props:{ suppliers:Array<Supplier> }) => {
     </thead>
     <tbody>
       { (suppliers.length === 0 ) 
-        ? <tr><td colSpan={3}>You haven’t created any suppliers yet</td></tr>
+        ? <tr><td colSpan={3}>You haven not created any suppliers yet</td></tr>
         : <>
           {suppliers.map((supplier, idx) => (
             <tr key={idx}>
-              <td>{supplier.name}</td>
+              <td><button onClick={()=>{ onInspectRequest(supplier) }}>{supplier.name}</button></td>
               <td>{supplier.category}</td>
-              <td><button>Delete</button></td>
+              <td><button onClick={()=>{ onDeleteRequest(supplier) }}>Delete</button></td>
             </tr>
           ))}
         </>
