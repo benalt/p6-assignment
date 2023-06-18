@@ -18,7 +18,7 @@ const SupplierTable = ( props:{
     </thead>
     <tbody>
       { (suppliers.length === 0 ) 
-        ? <tr><td colSpan={3} className="text-center italic">You haven not created any suppliers yet</td></tr>
+        ? <tr><td colSpan={3} className="text-center italic">You have not created any suppliers yet</td></tr>
         : <>
           {suppliers.map((supplier, idx) => (
             <tr key={`supplier-table-${idx}`}>
