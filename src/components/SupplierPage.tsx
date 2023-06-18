@@ -3,14 +3,14 @@ import SupplierTable from '@/components/SupplierTable'
 import { useEffect, useState } from 'react'
 import EditSupplier from './EditSupplier';
 import { isValidSupplier } from '@/lib/supplier.validator';
+import FlashMessage from './FlashMessage';
 
 const SupplierPage = () => {
 
   const [supplierList, setSuppliersList] : [Array<Supplier>|undefined, Function] = useState();
   const [dirtySupplier, setDirtySupplier]: [Partial<Supplier>|undefined, Function] = useState();
   const [activeSupplier, setActiveSupplier]: [Partial<Supplier>|undefined, Function] = useState();
-  const [categoriesList, setCategoriesList]: [Array<CategoryOptions>|undefined, Function] = useState();
-  const [flashMessage, setFlashMessage]: [string|null, Function] = useState(null)
+  const [flashMessage, setFlashMessage]: [string, Function] = useState('')
 
   useEffect(()=>{
     async function fetchData() {
@@ -21,18 +21,8 @@ const SupplierPage = () => {
       const responsedData = await res.json();
       setSuppliersList(responsedData)
     }
-
-    async function fetchCatagories() {
-      const res = await fetch('http://localhost:8080/api/categories')
-      if (!res.ok) {
-        throw new Error('Failed to fetch data')
-      }
-      const responsedData = await res.json();
-      setCategoriesList(responsedData)
-    }
     //setTimeout(fetchData, 3000)
     fetchData()
-    fetchCatagories()
   }, [])
 
   useEffect(()=>{
@@ -50,29 +40,39 @@ const SupplierPage = () => {
     async function createOrUpdateSupplier() {
       const res = await fetch(fetchUrl, 
         { 
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
           method:fetchMethod,
           body: JSON.stringify(dirtySupplier)
         })
+      
       if (!res.ok) {
         throw new Error('Failed to fetch data')
       }
-      const responsedData = await res.json();
-      
-      // create a clone so that a state change won't act weird
-      let newSuppliersList = [ ...supplierList || [] ]
 
-      // determine if we need to upate or add 
-      let update = newSuppliersList.find( supplier => supplier.id === responsedData.id )
-      if ( update ) {
-        update = { ...update, ...responsedData }
-      } else {
-        newSuppliersList.push(responsedData)
+      const responsedData = await res.json();
+      if (responsedData.message) {
+        setFlashMessage( `${responsedData.message}`)
+        return 
       }
+      // create a clone so that a state change won't act weird
+      //let newSuppliersList = [ ...supplierList || [] ]
+      let updateIdx:number = -1;
+      if (supplierList) {
+        updateIdx = supplierList.findIndex( supplier => ( supplier.id === responsedData.id ))
+        if ( updateIdx >= 0 ) {
+          supplierList.splice(updateIdx, 1, responsedData)
+        } else {
+          supplierList.push(responsedData)
+        }
+      }
+      
+      setSuppliersList( [ ... supplierList || [responsedData] ])
+      setFlashMessage( `Supplier ${responsedData.name} has been ${ updateIdx? 'updated' : 'saved'}.`)
       setDirtySupplier(null); 
-      setSuppliersList( [
-        ... responsedData
-      ])
-      setFlashMessage( `Supplier ${responsedData.name} has been ${ update? 'updated' : 'saved'}.`)
+      setActiveSupplier(null); 
     }
     createOrUpdateSupplier()
 
@@ -85,23 +85,36 @@ const SupplierPage = () => {
     }
   }
 
-  function handleCancelEdit(){}
+  function handleAddNew() {
+    setActiveSupplier({})
+  }
+
+  function handleCancelEdit(){
+    setActiveSupplier(null)
+  }
 
   function handleInsepctRequest(supplier:Supplier){
-
+    setActiveSupplier(supplier)
   }
 
   function handleSupplierDeleteRequest(supplier:Supplier){
     async function deleteSupplier() {
-      const res = await fetch(`http://localhost:8080/api/suppliers/delete/${supplier.id}`, 
+      const res = await fetch(`http://localhost:8080/api/suppliers/${supplier.id}`, 
         { 
           method: "DELETE"
         })
       if (!res.ok) {
         throw new Error('Failed to delete data')
       }
+
+      if (supplierList) {
+        const itemIdx: number = supplierList.indexOf(supplier);
+        supplierList.splice(itemIdx, 1)
+        setSuppliersList([...supplierList])
+      }
       
       setFlashMessage( `Supplier ${supplier.name} has been deleted.`)
+
     }
     deleteSupplier()
   }
@@ -110,14 +123,20 @@ const SupplierPage = () => {
 <>
 <div>
   <h1>Supliers </h1>
-  <button>Add Supplier</button>
+  <button onClick={handleAddNew}>Add Supplier</button>
   { !supplierList 
   ?  <>Fetching Supplier List</>
     : <SupplierTable suppliers={supplierList} onDeleteRequest={handleSupplierDeleteRequest} onInspectRequest={handleInsepctRequest} />
   }
-  { !supplierList || !categoriesList
-    ? <>Fetching Suppliers and Categories</>
-    : <EditSupplier supplier={ activeSupplier || {} } categories={categoriesList} onChange={handleSupplierChange} onCancel={handleCancelEdit} />
+
+  { activeSupplier
+    ? <EditSupplier supplier={ activeSupplier || {} } onChange={handleSupplierChange} onCancel={handleCancelEdit} />
+    : <></>
+  }
+  {
+   flashMessage
+   ? <FlashMessage message={flashMessage} />
+   : <></>
   }
   
 </div>

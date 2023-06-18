@@ -78,15 +78,27 @@ exports.findOne = (req, res) => {
 // Update a Supplier by the id in the request
 exports.update = (req, res) => {
   const id = req.params.id;
-
+  console.log(req.body)
   Supplier.update(req.body, {
     where: { id: id }
   })
     .then(num => {
       if (num == 1) {
-        res.send({
-          message: "Supplier was updated successfully."
-        });
+        Supplier.findByPk(id)
+          .then(data => {
+            if (data) {
+              res.send(data);
+            } else {
+              res.status(404).send({
+                message: `Cannot find Supplier with id=${id}.`
+              });
+            }
+          })
+          .catch(err => {
+            res.status(500).send({
+              message: `Error retrieving Supplier with id=${id}`
+            });
+          });
       } else {
         res.send({
           message: `Cannot update Supplier with id=${id}. Maybe Supplier was not found or req.body is empty!`
