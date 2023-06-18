@@ -16,7 +16,7 @@ export function isValidSupplier(supplier:Partial<Supplier>): [boolean , { [key: 
     console.log(`validating ${key}, ${val}, ${validates(key, val)}` )
     if (!validates(key, val)) {
       isValid = false
-      inValidMessages[key] = `${key} is not valid`
+      inValidMessages[key] = `${ key} is not valid`
     }
   })
   

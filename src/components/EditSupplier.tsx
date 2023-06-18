@@ -33,26 +33,38 @@ const EditSupplier = (props:{
   }
 
   return (
-<div>
-    <label>Name <span>{errorMsg.name}</span></label>
-    <input type="text"  name="name" defaultValue={supplier.name} onChange={handleDataChange} />
-    <br />
-    <label>Email <span>{errorMsg.emailAddress}</span></label>
-    <input type="text" name="emailAddress" defaultValue={supplier.emailAddress} onChange={handleDataChange} />
-    <br />
-    <label>Category <span>{errorMsg.category}</span></label>
-    <select name="category" defaultValue={ supplier.category } onChange={handleDataChange}>
-      <option value="" disabled selected>Select your Category</option>
-      {Object.entries(CategoryOptions).map(([key, label]) => (
-        <option value={key} key={`category-${key}`}>{label}</option>
-      ))}
-    </select>
-    <br />
-    <label>Description <span>{errorMsg.description}</span></label>
-    <textarea name="description" defaultValue={supplier.description} onChange={handleDataChange} rows={4} cols={50} />
-    <br />
-    <button onClick={handleCancel}>Cancel</button>
-    <button onClick={handleSubmit}>Save Supplier</button>
+<div className="max-w-[400px] mx-auto">
+    <h2 className="text-xs font-bold border-b-2 border-ui p-[.5rem]">{ supplier.id ? "Update" : "Create" } Supplier</h2>
+    <ul className="mt-[2rem]">
+      <li className={`formRow ${errorMsg.name ? "formErrorRow" : ""}`}>
+        <label className="formLabel">Name</label>
+        <input className="textInput" type="text" name="name" defaultValue={supplier.name} onChange={handleDataChange} />
+        <span className="formError">{errorMsg.name}</span>
+      </li>
+      <li className={`formRow ${errorMsg.emailAddress ? "formErrorRow" : ""}`}>
+        <label className="formLabel">Email</label>
+        <input className="textInput" type="text" name="emailAddress" defaultValue={supplier.emailAddress} onChange={handleDataChange} />
+        <span className="formError">{errorMsg.emailAddress}</span>
+      </li>
+      <li className={`formRow ${errorMsg.category ? "formErrorRow" : ""}`}>
+        <label className="formLabel">Category</label>
+        <select className="selectInput" name="category" defaultValue={ supplier.category } onChange={handleDataChange}>
+          <option value="" disabled selected>Select Category</option>
+          {Object.entries(CategoryOptions).map(([key, label]) => (
+            <option value={key} key={`category-${key}`}>{label}</option>
+          ))}
+        </select>
+        <span className="formError">{errorMsg.category}</span>
+      </li>
+      <li className="formRow">
+        <label className="formLabel"><span>Description</span> <span  className="formLabelNote">Optional</span></label>
+        <textarea className="textInput" name="description" defaultValue={supplier.description} onChange={handleDataChange} rows={4} cols={50} />   
+      </li>
+    </ul>
+    <div className="flex mt-[1rem] justify-end gap-[.5rem] ">
+      <button className="btn" onClick={handleCancel}>Cancel</button>
+      <button className="btn" onClick={handleSubmit}>Save Supplier</button>
+    </div>
 </div>
 )}
 

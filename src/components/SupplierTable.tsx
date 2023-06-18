@@ -8,25 +8,23 @@ const SupplierTable = ( props:{
   const { suppliers, onDeleteRequest, onInspectRequest } = props
 
   return (<>
-  <table>
+  <table className="data-table w-full">
     <thead>
       <tr>
-        <th>Id</th>
         <th>Name</th>
-        <th>Category</th>
-        <th>Delete</th>    
+        <th className="w-3/12">Category</th>
+        <th className="w-2/12">Delete</th>    
       </tr>
     </thead>
     <tbody>
       { (suppliers.length === 0 ) 
-        ? <tr><td colSpan={3}>You haven not created any suppliers yet</td></tr>
+        ? <tr><td colSpan={3} className="text-center italic">You haven not created any suppliers yet</td></tr>
         : <>
           {suppliers.map((supplier, idx) => (
-            <tr key={idx}>
-              <td>{supplier.id}</td>
-              <td><button onClick={()=>{ onInspectRequest(supplier) }}>{supplier.name}</button></td>
+            <tr key={`supplier-table-${idx}`}>
+              <td><button className="text-link" onClick={()=>{ onInspectRequest(supplier) }}>{supplier.name}</button></td>
               <td>{CategoryOptions[supplier.category]}</td>
-              <td><button onClick={()=>{ onDeleteRequest(supplier) }}>Delete</button></td>
+              <td><button className="btn font-xxs" onClick={()=>{ onDeleteRequest(supplier) }}>Delete</button></td>
             </tr>
           ))}
         </>
