@@ -137,7 +137,7 @@ export default function  Home() {
       <main className="relative pt-[4rem] max-w-screen-sm mx-auto">
         <div className={ activeSupplier ? "blur" : "" }>
           <div className="flex py-[1rem] mb-[2rem] border-b-4 border-ui">
-            <h1 className="grow text-2xl font-bold">Supliers </h1>
+            <h1 className="grow text-2xl font-bold">Suppliers </h1>
             <button onClick={handleAddNew} className="btn">Add Supplier</button>
           </div>
           { !supplierList 
